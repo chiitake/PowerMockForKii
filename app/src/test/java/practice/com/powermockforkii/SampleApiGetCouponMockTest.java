@@ -1,9 +1,12 @@
 package practice.com.powermockforkii;
 
+import android.text.TextUtils;
+
 import com.kii.cloud.storage.Kii;
 import com.kii.cloud.storage.KiiBucket;
 import com.kii.cloud.storage.KiiObject;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
@@ -14,8 +17,12 @@ import org.robolectric.annotation.Config;
 
 import java.io.IOException;
 
+import static org.mockito.Matchers.anyString;
+
 /**
  * 通信を行わないで、モックテストをする
+ *
+ * TextUtils
  *
  * [設定]
  * Example local unit test, which will execute on the development machine (host).
@@ -25,7 +32,7 @@ import java.io.IOException;
 @RunWith(PowerMockRunner.class) // 1
 @Config(packageName = "me.shopnews.app", constants = BuildConfig.class, sdk = 21)
 @PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "android.*"}) // 3
-@PrepareForTest({SampleApi.class, Kii.class, KiiBucket.class})
+@PrepareForTest({SampleApi.class, Kii.class, KiiBucket.class, TextUtils.class})
 public class SampleApiGetCouponMockTest {
 
 	/**
@@ -40,9 +47,20 @@ public class SampleApiGetCouponMockTest {
 		PowerMockito.mockStatic(Kii.class);
 		PowerMockito.when(Kii.bucket("coupon_list")).thenThrow(IOException.class);
 
+		// TextUtilsをモックに。空なら true
+		PowerMockito.mockStatic(TextUtils.class);
+		PowerMockito.when(TextUtils.isEmpty(anyString())).thenReturn(false);
+		PowerMockito.when(TextUtils.isEmpty("")).thenReturn(true);
+		PowerMockito.when(TextUtils.isEmpty(null)).thenReturn(true);
+
 		// spyする
 		SampleApi orgSampleApi = new SampleApi();
 		SampleApi spy = PowerMockito.spy(orgSampleApi);
+
+		// test TextUtils
+		Assert.assertEquals(true, TextUtils.isEmpty(null));
+		Assert.assertEquals(true, TextUtils.isEmpty(""));
+		Assert.assertEquals(false, TextUtils.isEmpty("abc"));
 
 		// test
 		String validCouponId = "validDummyCouponId";	// ダミーの有効なクーポンID
@@ -56,6 +74,17 @@ public class SampleApiGetCouponMockTest {
 	@Test (expected = NullPointerException.class)
 	public void getCoupon_無効な空ID() throws Exception {
 		SampleApi sampleApi = new SampleApi();
+
+		// TextUtilsをモックに。空なら true
+		PowerMockito.mockStatic(TextUtils.class);
+		PowerMockito.when(TextUtils.isEmpty(anyString())).thenReturn(false);
+		PowerMockito.when(TextUtils.isEmpty("")).thenReturn(true);
+		PowerMockito.when(TextUtils.isEmpty(null)).thenReturn(true);
+
+		// test TextUtils
+		Assert.assertEquals(true, TextUtils.isEmpty(null));
+		Assert.assertEquals(true, TextUtils.isEmpty(""));
+		Assert.assertEquals(false, TextUtils.isEmpty("abc"));
 
 		// test
 		String emptyCouponId = "";

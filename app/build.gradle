@@ -24,7 +24,8 @@ android {
     }
     // add
     testOptions {
-        unitTests.returnDefaultValues = true
+        // unitTests.returnDefaultValues = true
+        useLibrary 'org.apache.http.legacy'
     }
     lintOptions {
         abortOnError false
